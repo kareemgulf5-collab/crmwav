@@ -5,7 +5,7 @@ root = Path(__file__).parent
 src = root
 css = (src / "styles.css").read_text(encoding="utf-8")
 shell = (src / "shell.html").read_text(encoding="utf-8")
-js = "\n".join((src / f).read_text(encoding="utf-8") for f in ["i18n.js", "core.js", "metrics.js", "ui.js", "views.js"])
+js = "\n".join((src / f).read_text(encoding="utf-8") for f in ["config.js", "i18n.js", "core.js", "metrics.js", "ui.js", "views.js"])
 
 html = f"""<!doctype html>
 <html lang="ar" dir="rtl">

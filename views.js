@@ -1077,7 +1077,7 @@ VIEWS.settings = {
         ${kv([[t('set.mode'), isCloud() ? `<span class="lime">${t('set.modeCloud')}</span>` : t('set.modeDemo')], isCloud() ? [t('set.lastSync'), Sync.lastSync ? ago(Sync.lastSync) : '—'] : null])}
         <label class="field" style="margin-top:14px"><span>${t('set.url')}</span><input class="input" id="apiUrl" dir="ltr" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(Sync.url())}" ${isCloud() ? 'readonly' : ''} /></label>
         <div class="quick" style="margin-top:12px">
-          ${isCloud() ? `<button data-act="syncNow">${icon('sync')}${t('set.syncNow')}</button><button data-act="disconnect">${icon('logout', 'flip')}${t('set.disconnect')}</button>` : `<button data-act="testUrl">${icon('link')}${t('set.test')}</button><button data-act="connectUrl">${icon('lock')}${t('login.connectBtn')}</button>`}
+          ${isCloud() ? `<button data-act="syncNow">${icon('sync')}${t('set.syncNow')}</button>${API_URL ? '' : `<button data-act="disconnect">${icon('logout', 'flip')}${t('set.disconnect')}</button>`}` : `<button data-act="testUrl">${icon('link')}${t('set.test')}</button><button data-act="connectUrl">${icon('lock')}${t('login.connectBtn')}</button>`}
         </div>
         <div class="quick" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line)">
           ${admin || !isCloud() ? `<button data-act="backup">${icon('download')}${t('set.backup')}</button>` : ''}
@@ -1169,7 +1169,7 @@ function renderLogin(msg = '') {
   $('#login').hidden = false;
   closeDrawer(); closeModal(); closePalette();
   const api = Sync.url();
-  const mode = LOGIN_MODE || (api ? 'cloud' : 'demo');
+  const mode = API_URL ? 'cloud' : LOGIN_MODE || (api ? 'cloud' : 'demo');
   const card = $('#loginCard');
   const head = `<div class="login__top">${brandHTML()}<button class="lang-btn" data-act="lang">${LANG === 'ar' ? 'EN' : 'ع'}</button></div><h1 class="login__title">${t('login.title')}</h1>`;
   if (mode === 'cloud' && api) {
@@ -1181,7 +1181,7 @@ function renderLogin(msg = '') {
         <button class="btn btn--block" type="submit">${icon('arrow', 'flip')}<span>${t('login.signin')}</span></button>
       </form>
       <div class="login__foot"><span class="login__badge"><i></i>${t('login.connected')}</span>
-        <div style="display:flex;gap:14px;margin-top:12px;flex-wrap:wrap"><button class="dim" data-act="loginDemo">${t('login.useDemo')}</button><button class="dim" data-act="loginChangeUrl">${t('set.disconnect')}</button></div></div>`;
+        ${API_URL ? '' : `<div style="display:flex;gap:14px;margin-top:12px;flex-wrap:wrap"><button class="dim" data-act="loginDemo">${t('login.useDemo')}</button><button class="dim" data-act="loginChangeUrl">${t('set.disconnect')}</button></div>`}</div>`;
     $('#loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const f = e.target, btn = $('button[type=submit]', f);
@@ -1259,6 +1259,7 @@ function onAuthExpired() { if (SESSION) logout(true); }
    BOOT
    ========================================================================== */
 (function boot() {
+  if (SESSION && API_URL && !isCloud()) SESSION = null; // a live URL is built in — no demo sessions
   if (SESSION && isCloud() && (!Sync.url() || !SESSION.token)) SESSION = null;
   if (SESSION) {
     if (!Store.load()) { if (isCloud()) SESSION = null; else seedDemo(); }

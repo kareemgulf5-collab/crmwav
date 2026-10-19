@@ -22,6 +22,9 @@ CRM داخلي لـ WAV بنفس هوية الموقع. ملف `index.html` وا
 > لو عدّلت في `Code.gs` بعد كده: **Deploy ← Manage deployments ← Edit ← Version: New version**.
 > لو نسيت باسورد الأدمن: شغّل الفانكشن `resetAdminPassword` وهتلاقي باسورد جديد في الـ log.
 
+## خلّي الموقع يفتح على الحقيقي على طول
+افتح `config.js` وحط لينك الـ Web App في `API_URL`، وبعدين شغّل `python3 build.py`. كده أي حد يفتح لينك Vercel هيروح على شاشة الدخول الحقيقية، ومفيش وضع تجريبي.
+
 ## الصلاحيات
 | الدور | يقدر يعمل إيه |
 |---|---|
@@ -47,6 +50,7 @@ await fetch(process.env.CRM_URL, {
 
 | الملف | فيه إيه |
 |---|---|
+| `config.js` | لينك الـ Apps Script |
 | `styles.css` | التصميم |
 | `i18n.js` | كل النصوص بالعربي والإنجليزي |
 | `core.js` | الداتا والمزامنة |

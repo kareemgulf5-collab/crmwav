@@ -250,16 +250,25 @@ const Sync = {
   lastSync: null,
   flushing: false,
   timer: 0,
-  url() { return LS.get('wav_api', ''); },
+  url() { return API_URL || LS.get('wav_api', ''); },
   setState(s) { this.state = s; renderSyncPill(); },
   saveOutbox() { LS.set('wav_outbox', this.outbox); },
   async call(action, data = {}, { auth = true, url } = {}) {
     const body = { action, ...data };
     if (auth) body.token = SESSION?.token;
     // text/plain keeps this a "simple" request — no CORS preflight, which Apps Script can't answer.
-    const res = await fetch(url || this.url(), { method: 'POST', body: JSON.stringify(body), redirect: 'follow' });
-    if (!res.ok) throw Object.assign(new Error('HTTP ' + res.status), { code: 'NET' });
-    const j = await res.json();
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 45000);
+    let res, j;
+    try {
+      res = await fetch(url || this.url(), { method: 'POST', body: JSON.stringify(body), redirect: 'follow', signal: ctrl.signal });
+      if (!res.ok) throw Object.assign(new Error('HTTP ' + res.status), { code: 'NET' });
+      j = await res.json();
+    } catch (e) {
+      throw e.code ? e : Object.assign(new Error(e.name === 'AbortError' ? 'Timeout' : 'Network error'), { code: 'NET' });
+    } finally {
+      clearTimeout(timer);
+    }
     if (!j.ok) {
       const e = Object.assign(new Error(j.error || 'Error'), { code: j.code || 'ERR' });
       if (e.code === 'AUTH' && auth) onAuthExpired();
